@@ -1,0 +1,1045 @@
+"use strict";
+
+/*
+ * ============================================================
+ * CABANGILE DRAMA BUILDER
+ * FRONTEND APP
+ *
+ * Browser frontend
+ *       ↓
+ * POST /api/create-drama
+ *       ↓
+ * Node backend
+ *       ↓
+ * OmniRoute
+ *       ↓
+ * AI Provider
+ *
+ * This file does NOT import OmniRoute CLI modules.
+ * OmniRoute runs on the backend/server side.
+ * ============================================================
+ */
+
+const API_URL = "/api/create-drama";
+const HEALTH_URL = "/api/health";
+
+
+// ============================================================
+// DOM
+// ============================================================
+
+const ideaInput = document.getElementById("idea");
+const providerInput = document.getElementById("provider");
+const modelInput = document.getElementById("model");
+const scenesInput = document.getElementById("scenes");
+
+const createBtn = document.getElementById("createBtn");
+const exampleBtn = document.getElementById("exampleBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const backendStatus = document.getElementById("backendStatus");
+
+const progressCard = document.getElementById("progressCard");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+
+const resultCard = document.getElementById("resultCard");
+const result = document.getElementById("result");
+
+const consoleBox = document.getElementById("console");
+const clearBtn = document.getElementById("clearBtn");
+
+
+// ============================================================
+// EXAMPLE
+// ============================================================
+
+const EXAMPLE_IDEA =
+  "A young woman returns to her hometown and discovers a hidden family secret that changes everything she believed about her childhood.";
+
+
+// ============================================================
+// CONSOLE
+// ============================================================
+
+function log(message, type = "info") {
+
+  if (!consoleBox) return;
+
+  const line = document.createElement("div");
+
+  line.className = `console-line ${type}`;
+
+  const icon = document.createElement("span");
+
+  icon.textContent =
+    type === "success" ? "✓" :
+    type === "error" ? "✕" :
+    type === "warning" ? "!" :
+    "›";
+
+  const text = document.createElement("span");
+
+  text.textContent = message;
+
+  line.appendChild(icon);
+  line.appendChild(text);
+
+  consoleBox.appendChild(line);
+
+  consoleBox.scrollTop = consoleBox.scrollHeight;
+}
+
+
+// ============================================================
+// CLEAR CONSOLE
+// ============================================================
+
+if (clearBtn) {
+
+  clearBtn.addEventListener("click", () => {
+
+    consoleBox.innerHTML = "";
+
+    log("Console cleared.", "system");
+
+  });
+
+}
+
+
+// ============================================================
+// BACKEND STATUS
+// ============================================================
+
+async function checkBackend() {
+
+  if (!backendStatus) return;
+
+  backendStatus.className = "status checking";
+
+  backendStatus.textContent = "● Checking OmniRoute...";
+
+  try {
+
+    const response = await fetch(HEALTH_URL, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json"
+      },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    let data = {};
+
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+
+    backendStatus.className = "status online";
+
+    backendStatus.textContent = "● Backend online";
+
+    log(
+      data.message ||
+      data.status ||
+      "Backend and OmniRoute endpoint are available.",
+      "success"
+    );
+
+  } catch (error) {
+
+    backendStatus.className = "status offline";
+
+    backendStatus.textContent = "● Backend offline";
+
+    log(
+      "Backend health check failed: " + error.message,
+      "warning"
+    );
+
+  }
+
+}
+
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function showProgress() {
+
+  progressCard.classList.remove("hidden");
+
+  resultCard.classList.add("hidden");
+
+  setProgress(5, "Sending request to OmniRoute...");
+
+}
+
+
+function setProgress(percent, message) {
+
+  if (progressBar) {
+    progressBar.style.width = `${percent}%`;
+  }
+
+  if (progressText) {
+    progressText.textContent = message;
+  }
+
+}
+
+
+function setStep(stepNumber, state = "active") {
+
+  const step = document.getElementById(`step${stepNumber}`);
+
+  if (!step) return;
+
+  step.classList.remove(
+    "active",
+    "complete",
+    "error"
+  );
+
+  step.classList.add(state);
+
+}
+
+
+// ============================================================
+// RESULT
+// ============================================================
+
+function showResult(data) {
+
+  result.innerHTML = "";
+
+  resultCard.classList.remove("hidden");
+
+  /*
+   * Try to find common result fields.
+   * This allows the frontend to work with slightly
+   * different backend response structures.
+   */
+
+  const drama = data.drama || data.result || data;
+
+  // ----------------------------------------------------------
+  // TITLE
+  // ----------------------------------------------------------
+
+  const title =
+    drama.title ||
+    drama.name ||
+    data.title ||
+    "Untitled Drama";
+
+
+  const titleElement = document.createElement("h4");
+
+  titleElement.className = "result-title";
+
+  titleElement.textContent = "🎬 " + title;
+
+  result.appendChild(titleElement);
+
+
+  // ----------------------------------------------------------
+  // DESCRIPTION
+  // ----------------------------------------------------------
+
+  const description =
+    drama.description ||
+    drama.summary ||
+    data.description ||
+    data.summary;
+
+
+  if (description) {
+
+    const descriptionElement =
+      document.createElement("p");
+
+    descriptionElement.className = "result-description";
+
+    descriptionElement.textContent = description;
+
+    result.appendChild(descriptionElement);
+
+  }
+
+
+  // ----------------------------------------------------------
+  // SCENES
+  // ----------------------------------------------------------
+
+  const scenes =
+    drama.scenes ||
+    data.scenes ||
+    [];
+
+
+  if (Array.isArray(scenes) && scenes.length > 0) {
+
+    const heading =
+      document.createElement("h4");
+
+    heading.textContent =
+      `🎭 Scenes (${scenes.length})`;
+
+    result.appendChild(heading);
+
+
+    const sceneList =
+      document.createElement("div");
+
+    sceneList.className = "scene-list";
+
+
+    scenes.forEach((scene, index) => {
+
+      const sceneCard =
+        document.createElement("div");
+
+      sceneCard.className = "scene";
+
+
+      const sceneTitle =
+        scene.title ||
+        scene.name ||
+        `Scene ${index + 1}`;
+
+
+      const sceneDescription =
+        scene.description ||
+        scene.summary ||
+        scene.action ||
+        scene.prompt ||
+        "";
+
+
+      sceneCard.innerHTML = `
+        <div class="scene-number">
+          ${index + 1}
+        </div>
+
+        <div class="scene-content">
+
+          <strong>${escapeHtml(sceneTitle)}</strong>
+
+          ${
+            sceneDescription
+              ? `<p>${escapeHtml(sceneDescription)}</p>`
+              : ""
+          }
+
+        </div>
+      `;
+
+
+      sceneList.appendChild(sceneCard);
+
+    });
+
+
+    result.appendChild(sceneList);
+
+  }
+
+
+  // ----------------------------------------------------------
+  // VIDEO
+  // ----------------------------------------------------------
+
+  const videoUrl =
+    drama.videoUrl ||
+    drama.video_url ||
+    data.videoUrl ||
+    data.video_url;
+
+
+  if (videoUrl) {
+
+    const videoSection =
+      document.createElement("div");
+
+    videoSection.className =
+      "video-result";
+
+
+    videoSection.innerHTML = `
+      <h4>🎥 Final Video</h4>
+
+      <video
+        controls
+        playsinline
+        preload="metadata"
+      >
+        <source src="${escapeAttribute(videoUrl)}">
+        Your browser does not support video playback.
+      </video>
+
+      <a
+        href="${escapeAttribute(videoUrl)}"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Video
+      </a>
+    `;
+
+
+    result.appendChild(videoSection);
+
+  }
+
+
+  // ----------------------------------------------------------
+  // VIDEO PATH
+  // ----------------------------------------------------------
+
+  const videoPath =
+    drama.video ||
+    drama.videoPath ||
+    drama.video_path ||
+    data.video ||
+    data.videoPath;
+
+
+  if (videoPath && !videoUrl) {
+
+    const pathElement =
+      document.createElement("div");
+
+    pathElement.className =
+      "video-path";
+
+    pathElement.innerHTML = `
+      <strong>🎥 Video:</strong>
+      <code>${escapeHtml(String(videoPath))}</code>
+    `;
+
+    result.appendChild(pathElement);
+
+  }
+
+
+  // ----------------------------------------------------------
+  // RAW RESPONSE
+  // ----------------------------------------------------------
+
+  const rawDetails =
+    document.createElement("details");
+
+  const rawSummary =
+    document.createElement("summary");
+
+  rawSummary.textContent =
+    "View server response";
+
+
+  const rawPre =
+    document.createElement("pre");
+
+  rawPre.textContent =
+    JSON.stringify(data, null, 2);
+
+
+  rawDetails.appendChild(rawSummary);
+
+  rawDetails.appendChild(rawPre);
+
+  result.appendChild(rawDetails);
+
+}
+
+
+// ============================================================
+// HTML SAFETY
+// ============================================================
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+function escapeAttribute(value) {
+
+  return escapeHtml(value)
+    .replaceAll("`", "&#096;");
+
+}
+
+
+// ============================================================
+// CREATE DRAMA
+// ============================================================
+
+async function createDrama() {
+
+  const idea =
+    ideaInput.value.trim();
+
+  const provider =
+    providerInput.value;
+
+  const model =
+    modelInput.value.trim();
+
+  const scenes =
+    Number(scenesInput.value);
+
+
+  // ----------------------------------------------------------
+  // VALIDATION
+  // ----------------------------------------------------------
+
+  if (!idea) {
+
+    log(
+      "Please enter a drama idea.",
+      "error"
+    );
+
+    ideaInput.focus();
+
+    return;
+
+  }
+
+
+  if (!provider) {
+
+    log(
+      "Please select an AI provider.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!model) {
+
+    log(
+      "Please enter an AI model.",
+      "error"
+    );
+
+    modelInput.focus();
+
+    return;
+
+  }
+
+
+  if (!scenes || scenes < 1) {
+
+    log(
+      "Invalid scene count.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  // ----------------------------------------------------------
+  // UI
+  // ----------------------------------------------------------
+
+  createBtn.disabled = true;
+
+  createBtn.textContent =
+    "⏳ CREATING...";
+
+  showProgress();
+
+
+  setStep(1, "active");
+
+  log(
+    "Starting drama generation...",
+    "info"
+  );
+
+  log(
+    `Provider: ${provider}`,
+    "info"
+  );
+
+  log(
+    `Model: ${model}`,
+    "info"
+  );
+
+  log(
+    `Scenes requested: ${scenes}`,
+    "info"
+  );
+
+
+  try {
+
+    // --------------------------------------------------------
+    // STEP 1
+    // --------------------------------------------------------
+
+    setProgress(
+      10,
+      "Sending request to OmniRoute..."
+    );
+
+    setStep(1, "active");
+
+
+    const requestBody = {
+
+      idea: idea,
+
+      provider: provider,
+
+      model: model,
+
+      scenes: scenes
+
+    };
+
+
+    log(
+      "POST /api/create-drama",
+      "info"
+    );
+
+
+    // --------------------------------------------------------
+    // REQUEST
+    // --------------------------------------------------------
+
+    const response = await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+
+    setStep(1, "complete");
+
+
+    // --------------------------------------------------------
+    // RESPONSE
+    // --------------------------------------------------------
+
+    let data;
+
+    const contentType =
+      response.headers.get("content-type") || "";
+
+
+    if (contentType.includes("application/json")) {
+
+      data = await response.json();
+
+    } else {
+
+      const text =
+        await response.text();
+
+      data = {
+        message: text
+      };
+
+    }
+
+
+    // --------------------------------------------------------
+    // ERROR
+    // --------------------------------------------------------
+
+    if (!response.ok) {
+
+      const message =
+        data.error ||
+        data.message ||
+        `Server returned HTTP ${response.status}`;
+
+
+      throw new Error(message);
+
+    }
+
+
+    // --------------------------------------------------------
+    // STEP 2
+    // --------------------------------------------------------
+
+    setStep(2, "active");
+
+    setProgress(
+      40,
+      "Drama generated successfully."
+    );
+
+
+    log(
+      "OmniRoute request completed.",
+      "success"
+    );
+
+
+    log(
+      "Drama data received.",
+      "success"
+    );
+
+
+    setStep(2, "complete");
+
+
+    // --------------------------------------------------------
+    // STEP 3
+    // --------------------------------------------------------
+
+    setStep(3, "active");
+
+    setProgress(
+      65,
+      "Preparing drama scenes..."
+    );
+
+
+    log(
+      "Preparing scene data...",
+      "info"
+    );
+
+
+    const returnedScenes =
+      data.scenes ||
+      data.result?.scenes ||
+      data.drama?.scenes;
+
+
+    if (Array.isArray(returnedScenes)) {
+
+      log(
+        `${returnedScenes.length} scenes received.`,
+        "success"
+      );
+
+    }
+
+
+    setStep(3, "complete");
+
+
+    // --------------------------------------------------------
+    // STEP 4
+    // --------------------------------------------------------
+
+    setStep(4, "active");
+
+    setProgress(
+      85,
+      "Processing production result..."
+    );
+
+
+    log(
+      "Processing final result...",
+      "info"
+    );
+
+
+    // --------------------------------------------------------
+    // RESULT
+    // --------------------------------------------------------
+
+    showResult(data);
+
+
+    setStep(4, "complete");
+
+    setProgress(
+      100,
+      "Drama creation completed."
+    );
+
+
+    log(
+      "🎬 DRAMA CREATION COMPLETE.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Drama generation error:",
+      error
+    );
+
+
+    setProgress(
+      0,
+      "Drama creation failed."
+    );
+
+
+    for (let i = 1; i <= 4; i++) {
+
+      const step =
+        document.getElementById(`step${i}`);
+
+      if (step) {
+
+        step.classList.remove(
+          "active",
+          "complete"
+        );
+
+      }
+
+    }
+
+
+    const activeStep =
+      document.querySelector(
+        ".step.active"
+      );
+
+
+    if (activeStep) {
+      activeStep.classList.add("error");
+    }
+
+
+    log(
+      "❌ " + error.message,
+      "error"
+    );
+
+
+    resultCard.classList.remove(
+      "hidden"
+    );
+
+
+    result.innerHTML = `
+      <div class="error-result">
+
+        <h4>❌ Drama creation failed</h4>
+
+        <p>${escapeHtml(error.message)}</p>
+
+        <p>
+          Check the backend console and make sure
+          OmniRoute is running.
+        </p>
+
+      </div>
+    `;
+
+
+  } finally {
+
+    createBtn.disabled = false;
+
+    createBtn.textContent =
+      "🎬 CREATE DRAMA";
+
+  }
+
+}
+
+
+// ============================================================
+// CREATE BUTTON
+// ============================================================
+
+if (createBtn) {
+
+  createBtn.addEventListener(
+    "click",
+    createDrama
+  );
+
+}
+
+
+// ============================================================
+// EXAMPLE BUTTON
+// ============================================================
+
+if (exampleBtn) {
+
+  exampleBtn.addEventListener(
+    "click",
+    () => {
+
+      ideaInput.value =
+        EXAMPLE_IDEA;
+
+      log(
+        "Example drama idea loaded.",
+        "info"
+      );
+
+      ideaInput.focus();
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// RESET BUTTON
+// ============================================================
+
+if (resetBtn) {
+
+  resetBtn.addEventListener(
+    "click",
+    () => {
+
+      ideaInput.value =
+        EXAMPLE_IDEA;
+
+      providerInput.value =
+        "gemini";
+
+      modelInput.value =
+        "gemini-3.6-flash";
+
+      scenesInput.value =
+        "6";
+
+
+      progressCard.classList.add(
+        "hidden"
+      );
+
+      resultCard.classList.add(
+        "hidden"
+      );
+
+
+      if (progressBar) {
+        progressBar.style.width =
+          "0%";
+      }
+
+
+      if (progressText) {
+        progressText.textContent =
+          "Preparing...";
+      }
+
+
+      for (let i = 1; i <= 4; i++) {
+
+        const step =
+          document.getElementById(
+            `step${i}`
+          );
+
+        if (step) {
+
+          step.classList.remove(
+            "active",
+            "complete",
+            "error"
+          );
+
+        }
+
+      }
+
+
+      log(
+        "Form reset.",
+        "info"
+      );
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// ENTER / CTRL+ENTER
+// ============================================================
+
+if (ideaInput) {
+
+  ideaInput.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (
+        event.key === "Enter" &&
+        (event.ctrlKey || event.metaKey)
+      ) {
+
+        event.preventDefault();
+
+        createDrama();
+
+      }
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// STARTUP
+// ============================================================
+
+log(
+  "Cabangile Drama Builder loaded.",
+  "success"
+);
+
+log(
+  "Checking backend...",
+  "info"
+);
+
+checkBackend();
+
+
+// Recheck backend every 15 seconds.
+
+setInterval(
+  checkBackend,
+  15000
+);
