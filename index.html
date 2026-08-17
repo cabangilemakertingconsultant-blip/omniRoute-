@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Cabangile Drama Builder</title>
+
+  <link rel="stylesheet" href="/frontend/style.css">
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+
+    <div class="brand">
+      <div class="logo">🎬</div>
+
+      <div>
+        <h1>Cabangile Drama Builder</h1>
+        <p>AI Drama → Scenes → Video</p>
+      </div>
+    </div>
+
+    <div id="backendStatus" class="status checking">
+      ● Checking OmniRoute...
+    </div>
+
+  </header>
+
+
+  <!-- MAIN -->
+  <main class="container">
+
+    <!-- HERO -->
+    <section class="hero">
+
+      <div class="badge">
+        ✨ POWERED BY OMNIROUTE
+      </div>
+
+      <h2>Create a Cinematic Drama</h2>
+
+      <p>
+        Enter your story idea. OmniRoute will route the AI request
+        through your configured provider and Cabangile will prepare
+        the drama scenes for production.
+      </p>
+
+    </section>
+
+
+    <!-- DRAMA FORM -->
+    <section class="card">
+
+      <div class="card-title">
+        <span>🎭</span>
+
+        <div>
+          <h3>Drama Generator</h3>
+          <p>Describe the story you want to create.</p>
+        </div>
+      </div>
+
+
+      <!-- IDEA -->
+      <div class="field">
+
+        <label for="idea">
+          Drama Idea
+        </label>
+
+        <textarea
+          id="idea"
+          rows="7"
+          placeholder="Example: A young woman returns to her hometown and discovers a hidden family secret."
+        >A young woman returns to her hometown and discovers a hidden family secret.</textarea>
+
+      </div>
+
+
+      <!-- OPTIONS -->
+      <div class="grid">
+
+        <!-- PROVIDER -->
+        <div class="field">
+
+          <label for="provider">
+            AI Provider
+          </label>
+
+          <select id="provider">
+
+            <option value="gemini">
+              Gemini
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- MODEL -->
+        <div class="field">
+
+          <label for="model">
+            AI Model
+          </label>
+
+          <input
+            id="model"
+            type="text"
+            value="gemini-3.6-flash"
+            placeholder="Model name"
+          >
+
+        </div>
+
+
+        <!-- SCENES -->
+        <div class="field">
+
+          <label for="scenes">
+            Number of Scenes
+          </label>
+
+          <select id="scenes">
+
+            <option value="4">
+              4 Scenes
+            </option>
+
+            <option value="5">
+              5 Scenes
+            </option>
+
+            <option value="6" selected>
+              6 Scenes
+            </option>
+
+            <option value="8">
+              8 Scenes
+            </option>
+
+            <option value="10">
+              10 Scenes
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <!-- BUTTONS -->
+      <div class="buttons">
+
+        <button
+          id="createBtn"
+          class="primary"
+          type="button"
+        >
+          🎬 CREATE DRAMA
+        </button>
+
+
+        <button
+          id="exampleBtn"
+          class="secondary"
+          type="button"
+        >
+          💡 Example
+        </button>
+
+
+        <button
+          id="resetBtn"
+          class="secondary"
+          type="button"
+        >
+          ↻ Reset
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- PROGRESS -->
+    <section
+      id="progressCard"
+      class="card hidden"
+    >
+
+      <div class="card-title">
+
+        <span>⚙️</span>
+
+        <div>
+          <h3>Production Progress</h3>
+          <p id="progressText">
+            Preparing...
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="progress">
+
+        <div
+          id="progressBar"
+          class="progress-bar"
+        ></div>
+
+      </div>
+
+
+      <div class="steps">
+
+        <div
+          id="step1"
+          class="step"
+        >
+          <span>1</span>
+          AI Request
+        </div>
+
+
+        <div
+          id="step2"
+          class="step"
+        >
+          <span>2</span>
+          Generate Drama
+        </div>
+
+
+        <div
+          id="step3"
+          class="step"
+        >
+          <span>3</span>
+          Prepare Scenes
+        </div>
+
+
+        <div
+          id="step4"
+          class="step"
+        >
+          <span>4</span>
+          Build Video
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- RESULT -->
+    <section
+      id="resultCard"
+      class="card hidden"
+    >
+
+      <div class="card-title">
+
+        <span>🎥</span>
+
+        <div>
+          <h3>Drama Result</h3>
+          <p>Your generated drama information.</p>
+        </div>
+
+      </div>
+
+
+      <div id="result">
+
+        <!-- Result inserted by app.js -->
+
+      </div>
+
+    </section>
+
+
+    <!-- CONSOLE -->
+    <section class="console-card">
+
+      <div class="console-header">
+
+        <div>
+          <h3>Terminal</h3>
+          <span>Cabangile / OmniRoute</span>
+        </div>
+
+        <button
+          id="clearBtn"
+          type="button"
+        >
+          Clear
+        </button>
+
+      </div>
+
+
+      <div
+        id="console"
+        class="console"
+      >
+
+        <div class="console-line system">
+          <span>›</span>
+          <span>Cabangile Drama Builder starting...</span>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer>
+
+    <p>
+      🎬 Cabangile Drama Builder
+      <span>•</span>
+      OmniRoute AI
+    </p>
+
+  </footer>
+
+
+  <script src="/frontend/app.js"></script>
+
+</body>
+</html>
