@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Cabangile Drama Builder — OmniRoute</title>
+
+  <!-- GitHub Pages / relative paths -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <header class="topbar">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        🎬
+      </div>
+
+      <div>
+        <h1>Cabangile Drama Builder</h1>
+        <p>OmniRoute AI Drama Production</p>
+      </div>
+
+    </div>
+
+
+    <div class="connection-area">
+
+      <span id="backendStatus" class="status checking">
+        ● Checking backend
+      </span>
+
+      <span id="runtimeStatus" class="status">
+        Runtime: —
+      </span>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- =====================================================
+       NAVIGATION
+  ====================================================== -->
+
+  <nav class="navigation">
+
+    <button
+      class="nav-button active"
+      data-section="create"
+      type="button"
+    >
+      🎬 Create Drama
+    </button>
+
+    <button
+      class="nav-button"
+      data-section="providers"
+      type="button"
+    >
+      🔌 Providers
+    </button>
+
+    <button
+      class="nav-button"
+      data-section="status"
+      type="button"
+    >
+      📊 Status
+    </button>
+
+    <button
+      class="nav-button"
+      data-section="logs"
+      type="button"
+    >
+      🖥 Console
+    </button>
+
+  </nav>
+
+
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="container">
+
+
+    <!-- ===================================================
+         CREATE DRAMA
+    ==================================================== -->
+
+    <section
+      id="create"
+      class="page-section active-section"
+    >
+
+      <div class="hero">
+
+        <div class="hero-badge">
+          OMNIROUTE AI
+        </div>
+
+        <h2>
+          Turn Your Story Into a Drama
+        </h2>
+
+        <p>
+          Create a story, route the AI request through
+          OmniRoute, generate scenes and send the result
+          to the Cabangile production engine.
+        </p>
+
+      </div>
+
+
+
+      <!-- DRAMA CARD -->
+
+      <section class="card">
+
+        <div class="card-heading">
+
+          <div class="heading-icon">
+            ✍️
+          </div>
+
+          <div>
+            <h2>Drama Idea</h2>
+
+            <p>
+              Describe the story you want the AI to create.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="idea">
+            Story / Drama Idea
+          </label>
+
+          <textarea
+            id="idea"
+            rows="7"
+            placeholder="Enter your drama idea..."
+          >A young woman returns to her hometown and discovers a hidden family secret.</textarea>
+
+        </div>
+
+
+
+        <!-- AI SETTINGS -->
+
+        <div class="settings-grid">
+
+
+          <div class="field">
+
+            <label for="provider">
+              AI Provider
+            </label>
+
+            <select id="provider">
+
+              <option value="">
+                Loading providers...
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <div class="field">
+
+            <label for="model">
+              Model
+            </label>
+
+            <select id="model">
+
+              <option value="">
+                Select provider first
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <div class="field">
+
+            <label for="scenes">
+              Scenes
+            </label>
+
+            <select id="scenes">
+
+              <option value="4">
+                4
+              </option>
+
+              <option value="5">
+                5
+              </option>
+
+              <option
+                value="6"
+                selected
+              >
+                6
+              </option>
+
+              <option value="8">
+                8
+              </option>
+
+              <option value="10">
+                10
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- ACTIONS -->
+
+        <div class="actions">
+
+          <button
+            id="createBtn"
+            class="button primary"
+            type="button"
+          >
+            🎬 CREATE DRAMA
+          </button>
+
+
+          <button
+            id="exampleBtn"
+            class="button secondary"
+            type="button"
+          >
+            💡 Example
+          </button>
+
+
+          <button
+            id="resetBtn"
+            class="button secondary"
+            type="button"
+          >
+            ↻ Reset
+          </button>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =================================================
+           PRODUCTION
+      ================================================== -->
+
+      <section
+        id="progressCard"
+        class="card hidden"
+      >
+
+        <div class="card-heading">
+
+          <div class="heading-icon">
+            ⚙️
+          </div>
+
+          <div>
+
+            <h2>Production</h2>
+
+            <p id="progressText">
+              Waiting for request...
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="progress-track">
+
+          <div
+            id="progressBar"
+            class="progress-bar"
+          ></div>
+
+        </div>
+
+
+        <div class="production-steps">
+
+
+          <div
+            id="step1"
+            class="production-step"
+          >
+
+            <span>1</span>
+
+            <div>
+              <strong>AI Request</strong>
+              <small>Send request through OmniRoute</small>
+            </div>
+
+          </div>
+
+
+
+          <div
+            id="step2"
+            class="production-step"
+          >
+
+            <span>2</span>
+
+            <div>
+              <strong>Drama Generation</strong>
+              <small>Create the story</small>
+            </div>
+
+          </div>
+
+
+
+          <div
+            id="step3"
+            class="production-step"
+          >
+
+            <span>3</span>
+
+            <div>
+              <strong>Scene Engine</strong>
+              <small>Prepare scene data</small>
+            </div>
+
+          </div>
+
+
+
+          <div
+            id="step4"
+            class="production-step"
+          >
+
+            <span>4</span>
+
+            <div>
+              <strong>Video Production</strong>
+              <small>Build the final video</small>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =================================================
+           RESULT
+      ================================================== -->
+
+      <section
+        id="resultCard"
+        class="card hidden"
+      >
+
+        <div class="card-heading">
+
+          <div class="heading-icon">
+            🎥
+          </div>
+
+          <div>
+
+            <h2>Drama Result</h2>
+
+            <p>
+              Result returned by the backend.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div id="result">
+
+          <!-- JavaScript inserts real backend result here -->
+
+        </div>
+
+      </section>
+
+    </section>
+
+
+
+    <!-- ===================================================
+         PROVIDERS
+    ==================================================== -->
+
+    <section
+      id="providers"
+      class="page-section"
+    >
+
+      <div class="page-title">
+
+        <span>🔌</span>
+
+        <div>
+
+          <h2>OmniRoute Providers</h2>
+
+          <p>
+            Providers available through your OmniRoute backend.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="card">
+
+        <div
+          id="providersList"
+          class="providers-list"
+        >
+
+          <div class="loading">
+            Loading providers...
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+
+
+    <!-- ===================================================
+         STATUS
+    ==================================================== -->
+
+    <section
+      id="status"
+      class="page-section"
+    >
+
+      <div class="page-title">
+
+        <span>📊</span>
+
+        <div>
+
+          <h2>System Status</h2>
+
+          <p>
+            OmniRoute and Cabangile backend information.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="status-grid">
+
+
+        <div class="status-card">
+
+          <span class="status-card-icon">
+            🟢
+          </span>
+
+          <div>
+
+            <small>Backend</small>
+
+            <strong id="statusBackend">
+              Checking...
+            </strong>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="status-card">
+
+          <span class="status-card-icon">
+            🔀
+          </span>
+
+          <div>
+
+            <small>OmniRoute</small>
+
+            <strong id="statusOmniRoute">
+              Checking...
+            </strong>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="status-card">
+
+          <span class="status-card-icon">
+            🤖
+          </span>
+
+          <div>
+
+            <small>Providers</small>
+
+            <strong id="statusProviders">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="status-card">
+
+          <span class="status-card-icon">
+            ⚙️
+          </span>
+
+          <div>
+
+            <small>Runtime</small>
+
+            <strong id="statusRuntime">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <section class="card">
+
+        <div class="card-heading">
+
+          <div class="heading-icon">
+            ❤️
+          </div>
+
+          <div>
+
+            <h2>Health Response</h2>
+
+            <p>
+              Raw health information from the backend.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <pre
+          id="healthOutput"
+          class="json-output"
+        >Waiting...</pre>
+
+      </section>
+
+    </section>
+
+
+
+    <!-- ===================================================
+         CONSOLE
+    ==================================================== -->
+
+    <section
+      id="logs"
+      class="page-section"
+    >
+
+      <div class="page-title">
+
+        <span>🖥</span>
+
+        <div>
+
+          <h2>Console</h2>
+
+          <p>
+            Frontend communication and backend events.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="console-card">
+
+        <div class="console-header">
+
+          <div>
+
+            <strong>
+              Cabangile / OmniRoute
+            </strong>
+
+            <small>
+              Runtime console
+            </small>
+
+          </div>
+
+
+          <button
+            id="clearBtn"
+            class="clear-button"
+            type="button"
+          >
+            Clear
+          </button>
+
+        </div>
+
+
+        <div
+          id="console"
+          class="console"
+        >
+
+          <div class="console-line system">
+            <span>›</span>
+            <span>
+              Cabangile Drama Builder initialized.
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+
+  </main>
+
+
+
+  <!-- =====================================================
+       FOOTER
+  ====================================================== -->
+
+  <footer>
+
+    <strong>
+      🎬 Cabangile Drama Builder
+    </strong>
+
+    <span>•</span>
+
+    <span>
+      OmniRoute AI
+    </span>
+
+  </footer>
+
+
+
+  <!-- IMPORTANT:
+       Relative path for GitHub Pages -->
+  <script src="./app.js"></script>
+
+</body>
+</html>
